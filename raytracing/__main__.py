@@ -92,7 +92,9 @@ def render_globe():
 
 
 def render_noise():
-    noise_texture = Noise(scale=4, mode="sine", turb_depth=12, albedo=vec3.Vec3(0.5,0.5,0.5))
+    noise_texture = Noise(
+        scale=4, mode="sine", turb_depth=12, albedo=Vec3(0.5, 0.5, 0.5)
+    )
     world = HittableList()
     world.add(Sphere(Vec3(0, -1000, 0), 1000, Lambertian(noise_texture)))
     world.add(Sphere(Vec3(0, 2, 0), 2, Lambertian(noise_texture)))
@@ -125,11 +127,99 @@ def render_s():
     cam.render(world)
 
 
+def render_quads():
+    world = HittableList()
+    world.add(
+        Quad(
+            Vec3(-3, -2, 5),
+            Vec3(0, 0, -4),
+            Vec3(0, 4, 0),
+            Lambertian(Vec3(1.0, 0.2, 0.2)),
+        )
+    )
+    world.add(
+        Quad(
+            Vec3(-2, -2, 0),
+            Vec3(4, 0, 0),
+            Vec3(0, 4, 0),
+            Lambertian(
+                Checkered(0.32, Image("wah-01.png"), SolidColor(Vec3(1.0, 0.5, 0)))
+            ),
+        )
+    )
+    world.add(
+        Quad(
+            Vec3(3, -2, 1),
+            Vec3(0, 0, 4),
+            Vec3(0, 4, 0),
+            Lambertian(Vec3(0.2, 0.2, 1)),
+        )
+    )
+    world.add(
+        Quad(
+            Vec3(-2, 3, 1), Vec3(4, 0, 0), Vec3(0, 0, 4), Lambertian(Vec3(1.0, 0, 0.5))
+        )
+    )
+    world.add(
+        Quad(
+            Vec3(-2, -3, 5),
+            Vec3(4, 0, 0),
+            Vec3(0, 0, -4),
+            Lambertian(Vec3(0, 1.0, 0.5)),
+        )
+    )
+    cam = Camera(
+        vfov=80,
+        lookfrom=Vec3(0, 0, 9),
+        lookat=Vec3(0, 0, 0),
+        image_width=1400,
+        samples_per_pixel=10,
+    )
+    cam.render(world)
+
+
+def render_simple_light():
+    world = HittableList()
+    ntext = Noise(scale=4, mode="sine", turb_depth=4, albedo=Vec3(0.5, 0.5, 0.5))
+    world.add(Sphere(Vec3(0, -1000, 0), 1000, Lambertian(ntext)))
+    world.add(Sphere(Vec3(0, 2, 0), 2, Lambertian(ntext)))
+    world.add(
+        Quad(Vec3(3, 1, -2), Vec3(2, 0, 0), Vec3(0, 2, 0), DiffuseLight(Vec3(4, 4, 4)))
+    )
+    cam = Camera(
+        vfov=10,
+        samples_per_pixel=100,
+        image_width=400,
+        background=Vec3(0, 0, 0),
+        lookfrom=Vec3(26, 3, 6),
+        lookat=Vec3(0, 2, 0),
+    )
+    cam.render(world)
+
+
+def render_simple_light_2():
+    world = HittableList()
+    ntext = Noise(scale=4, mode="sine", turb_depth=4, albedo=Vec3(1, 1, 1))
+    world.add(Sphere(Vec3(0, -1000, 0), 1000, Lambertian(ntext)))
+    world.add(Sphere(Vec3(0, 2, 0), 2, Lambertian(ntext)))
+    world.add(Sphere(Vec3(0, 7, 0), 2, DiffuseLight(Vec3(4, 4, 4))))
+    world.add(
+        Quad(Vec3(3, 1, -2), Vec3(2, 0, 0), Vec3(0, 2, 0), DiffuseLight(Vec3(4, 4, 4)))
+    )
+    cam = Camera(
+        vfov=20,
+        samples_per_pixel=100,
+        image_width=400,
+        background=Vec3(0, 0, 0),
+        lookfrom=Vec3(26, 3, 6),
+        lookat=Vec3(0, 2, 0),
+    )
+    cam.render(world)
+
+
 def main():
     tp = sys.argv[-1]
-    if tp not in ["checkered", "main", "globe", "noise", "s"]:
-        raise ValueError("unknown:", tp)
-    elif tp == "main":
+    if tp == "main":
         render_main()
     elif tp == "globe":
         render_globe()
@@ -137,8 +227,16 @@ def main():
         render_noise()
     elif tp == "s":
         render_s()
-    else:
+    elif tp == "checkered":
         render_checkered_balls()
+    elif tp == "quads":
+        render_quads()
+    elif tp == "simple_light":
+        render_simple_light()
+    elif tp == "simple_light2":
+        render_simple_light_2()
+    else:
+        raise ValueError("unknown:", tp)
 
 
 if __name__ == "__main__":

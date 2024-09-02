@@ -14,14 +14,15 @@ class Camera:
         lookfrom=vec3.Vec3(0, 0, 0),
         lookat=vec3.Vec3(0, 0, -1),
         vup=vec3.Vec3(0, 1, 0),
-        max_bounces=20,
+        max_bounces=50,
         image_width=400,
         defocus_angle=0,
         focus_dist=10,
+        background=vec3.Vec3(0.7, 0.8, 1),
     ):  #
         self.aspect_ratio = aspect_ratio
         self.samples_per_pixel = samples_per_pixel
-
+        self.background = background
         self.vfov = vfov
         self.lookfrom = lookfrom
         self.lookat = lookat
@@ -70,17 +71,20 @@ class Camera:
             did_reflect, attenuation, scattered = res.material.scatter(r, res)
             if did_reflect:
                 # print(attenuation,scattered, file=__import__("sys").stderr)
-                return attenuation.item_mul(
+                scattered_light = attenuation.item_mul(
                     self.ray_color(scattered, world, bounces - 1)
                 )
             else:
-                return vec3.Vec3(0, 0, 0)
+                scattered_light = vec3.Vec3(0, 0, 0)
+            emmited_light = res.material.emit(res.u, res.v, res.p)
+            return scattered_light + emmited_light
             # direction = res.normal + vec3.Vec3.random_unit()
             # return 0.5 * self.ray_color(ray.Ray(res.p, direction), world, bounces - 1)
             # return 0.5 * (res.normal + vec3.Vec3(1, 1, 1))
-        udir = r.dir.normalized()
-        a = 0.5 * (udir.y + 1.0)
-        return (1.0 - a) * vec3.Vec3(1.0, 1.0, 1.0) + a * vec3.Vec3(0.5, 0.7, 1.0)
+        # udir = r.dir.normalized()
+        # a = 0.5 * (udir.y + 1.0)
+        # return (1.0 - a) * vec3.Vec3(1.0, 1.0, 1.0) + a * vec3.Vec3(0.5, 0.7, 1.0)
+        return self.background
 
     def render(self, world):
         self.pixel_samples_scale = 1 / self.samples_per_pixel

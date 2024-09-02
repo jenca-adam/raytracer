@@ -48,7 +48,7 @@ class Sphere(Hittable):
             root,
             is_front,
             self.material,
-            *self.getuv(outward_normal),
+            *self.getuv(normal),
         )
 
     def getuv(self, p):
@@ -56,6 +56,36 @@ class Sphere(Hittable):
         u = phi / (2 * math.pi)
         v = theta / math.pi
         return u, v
+
+
+class Quad(Hittable):
+    def __init__(self, q, u, v, material):
+        n = u.cross(v)
+        self.q = q
+        self.u = u
+        self.v = v
+        self.material = material
+        self.normal = n.normalized()
+        self.d = self.normal.dot(q)
+        self.w = n / n.dot(n)
+
+    def _hit(self, ray, ray_tmin, ray_tmax):
+        dn = self.normal.dot(ray.dir)
+        if abs(dn) < 1e-8:
+            return (False,)
+        t = (self.d - self.normal.dot(ray.origin)) / dn
+        if t <= ray_tmin or ray_tmax <= t:
+            return (False,)
+
+        intersection = ray.at(t)
+        hitpt_vector = intersection - self.q
+        alpha = self.w.dot(hitpt_vector.cross(self.v))
+        beta = self.w.dot(self.u.cross(hitpt_vector))
+        if not ((0 < alpha < 1) and (0 < beta < 1)):
+            return (False,)
+        is_front = ray.dir.dot(self.normal) < 0
+        normal = (-1) ** (is_front) * self.normal
+        return (True, intersection, normal, t, is_front, self.material, alpha, beta)
 
 
 class HittableList(Hittable):

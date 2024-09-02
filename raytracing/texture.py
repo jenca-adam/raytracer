@@ -55,19 +55,22 @@ class Image(Texture):
 
 
 class Noise(Texture):
-    def __init__(self, scale=1, mode="normal", turb_depth = 7, albedo=vec3.Vec3(1,1,1)):
+    def __init__(self, scale=1, mode="normal", turb_depth=7, albedo=vec3.Vec3(1, 1, 1)):
         self.noise = perlin.Perlin()
         self.scale = scale
         self.albedo = albedo
         self.mode = mode
         self.turb_depth = turb_depth
+
     def sample(self, u, v, p):
-        if self.mode=="normal":
-            text = 0.5 * (1+self.noise.noise(p*self.scale))
-        elif self.mode=="turb":
-            text = self.noise.turb(p*self.scale,self.turb_depth)
-        elif self.mode=="sine":
-            text = (1+math.sin(self.scale*p.z+10 *self.noise.turb(p, self.turb_depth)))
+        if self.mode == "normal":
+            text = 0.5 * (1 + self.noise.noise(p * self.scale))
+        elif self.mode == "turb":
+            text = self.noise.turb(p * self.scale, self.turb_depth)
+        elif self.mode == "sine":
+            text = 1 + math.sin(
+                self.scale * p.z + 10 * self.noise.turb(p, self.turb_depth)
+            )
         else:
             text = 1
-        return self.albedo*text
+        return self.albedo * text
