@@ -1,13 +1,13 @@
-from . import vec3, ray, randfloat, texture
+from . import ray, randfloat, texture, vec3
 
-
+BLACK = vec3.Vec3(0,0,0)
+WHITE = vec3.Vec3(1,1,1)
 class Material:
     def scatter(self, r, hr):
         return False, None, None
 
     def emit(self, u, v, p):
-        return vec3.Vec3(0, 0, 0)
-
+        return BLACK
 
 class Lambertian(Material):
     def __init__(self, albedo):
@@ -28,30 +28,32 @@ class Metal(Material):
         self.fuzz = min(fuzz, 1)
 
     def scatter(self, r, hr):
-        scatter_dir = r.dir.reflect(hr.normal)
-        scatter_dir = scatter_dir.normalized() + (self.fuzz * vec3.Vec3.random_unit())
+        scatter_dir = vec3.reflect(r.dir, hr.normal)
+        scatter_dir = scatter_dir.normalized() + (
+            self.fuzz * vec3.Vec3.random_unit()
+        )
         scattered_ray = ray.Ray(hr.p, scatter_dir)
         return (
-            scattered_ray.dir.dot(hr.normal) > 0,
+            vec3.dot(scattered_ray.dir, hr.normal) > 0,
             self.albedo.sample(hr.u, hr.v, hr.p),
             scattered_ray,
         )
 
 
 class Dielectric(Material):
-    def __init__(self, refraction_index, albedo=vec3.Vec3(1.0, 1.0, 1.0)):
+    def __init__(self, refraction_index, albedo=WHITE):
         self.refraction_index = refraction_index
         self.albedo = texture.Texture.texturify(albedo)
 
     def scatter(self, r, hr):
         ri = 1 / self.refraction_index if hr.front_face else self.refraction_index
         udir = r.dir.normalized()
-        cos_theta = min(-udir.dot(hr.normal), 1)
+        cos_theta = min(-vec3.dot(udir, hr.normal), 1)
         sin_theta = (1 - (cos_theta**2)) ** 0.5
         if ri * sin_theta > 1 or reflectance(cos_theta, ri) > randfloat.randfloat():
-            scatter_dir = udir.reflect(hr.normal)
+            scatter_dir = vec3.reflect(udir,hr.normal)
         else:
-            scatter_dir = vec3.Vec3.refract(udir, hr.normal, ri)
+            scatter_dir = vec3.refract(udir, hr.normal, ri)
         return True, self.albedo.sample(hr.u, hr.v, hr.p), ray.Ray(hr.p, scatter_dir)
 
 

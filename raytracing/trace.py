@@ -64,7 +64,7 @@ class Camera:
 
     def ray_color(self, r, world, bounces):
         if bounces == 0:
-            return vec3.Vec3(0, 0, 0)
+            return vec3.BLACK 
         did_hit, res = world.hit(r, 0.001, float("inf"))
 
         if did_hit:
@@ -75,7 +75,7 @@ class Camera:
                     self.ray_color(scattered, world, bounces - 1)
                 )
             else:
-                scattered_light = vec3.Vec3(0, 0, 0)
+                scattered_light = vec3.BLACK
             emmited_light = res.material.emit(res.u, res.v, res.p)
             return scattered_light + emmited_light
             # direction = res.normal + vec3.Vec3.random_unit()
@@ -104,14 +104,14 @@ class Camera:
                             ).clamp_all(interval.Interval(0, 0.999))
                             for sample in range(self.samples_per_pixel)
                         ),
-                        vec3.Vec3(0, 0, 0),
+                        vec3.BLACK,
                     )
                     * self.pixel_samples_scale
                 )
                 ppm.write_color(*pixel_color.gamma_corrected().asrgb())
 
     def get_ray(self, i, j):
-        offset = vec3.Vec3(random.random() - 0.5, random.random() - 0.5, 0)
+        offset = vec3.Vec3(random.random() - 0.5 , random.random() - 0.5, 0)
         pixel_pos = (
             self.pixel_start
             + ((i + offset.x) * self.pixel_delta_u)

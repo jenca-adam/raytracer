@@ -1,10 +1,13 @@
 from .randfloat import randfloat
+import numpy as np
+import cmath
 
 
 def linear_to_gamma(linear):
     if linear > 0:
         return linear ** (0.5)
     return 0
+
 
 
 class Vec3:
@@ -22,8 +25,7 @@ class Vec3:
     def length_squared(self):
         return self.x**2 + self.y**2 + self.z**2
 
-    def dot(self, v):
-        return self.x * v.x + self.y * v.y + self.z * v.z
+    
 
     def cross(self, v):
         return Vec3(
@@ -58,6 +60,9 @@ class Vec3:
 
     def __iter__(self):
         return iter((self.x, self.y, self.z))
+
+    def __getitem__(self, i):
+        return self.e[i]
 
     def asrgb(self):
         return Vec3(int(self.x * 256), int(self.y * 256), int(self.z * 256))
@@ -102,8 +107,7 @@ class Vec3:
     def near_zero(self):
         return abs(self.x) < 1e-8 and abs(self.y) < 1e-8 and abs(self.z) < 1e-8
 
-    def reflect(self, v):
-        return self - 2 * self.dot(v) * v
+    
 
     def item_mul(self, v):
         return Vec3(self.x * v.x, self.y * v.y, self.z * v.z)
@@ -111,9 +115,16 @@ class Vec3:
     def abs(self):
         return Vec3(abs(self.x), abs(self.y), abs(self.z))
 
-    @classmethod
-    def refract(cls, uv, n, etai_over_etat):
-        cos_theta = min(-uv.dot(n), 1)
+    
+def array(a):
+    return Vec3(*a)
+def dot(u, v):
+        return u.x * v.x + u.y * v.y + u.z * v.z
+def reflect(u, v):
+        return u - 2 * dot(u,v) * v
+def refract(uv, n, etai_over_etat):
+        cos_theta = min(-dot(uv,n), 1)
         r_out_perp = etai_over_etat * (uv + cos_theta * n)
         r_out_par = -((abs(1 - r_out_perp.length_squared)) ** 0.5) * n
         return r_out_perp + r_out_par
+BLACK = Vec3(0,0,0)

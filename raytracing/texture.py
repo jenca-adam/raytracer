@@ -2,7 +2,7 @@ from PIL import Image as PILImage
 from numpy import float64, asarray
 import sys
 import math
-from . import vec3, interval, perlin
+from . import interval, perlin, vec3
 
 
 class Texture:
@@ -38,20 +38,20 @@ class Checkered(Texture):
 class Image(Texture):
     def __init__(self, path):
         try:
-            self.img_data = asarray(PILImage.open(path))
+            self.img_data = asarray(PILImage.open(path)) * (1 / 255)
         except:
             self.img_data = None
 
     def sample(self, u, v, p):
         if self.img_data is None:
-            return vec3.Vec3(1, 0, 0)
+            return numpy.array([1, 0, 0])
         u = interval.Interval(0, 1).clamp(u)
         v = 1 - interval.Interval(0, 1).clamp(v)
         i = u * len(self.img_data[0])
         j = v * len(self.img_data)
         # print(i,j,u,v,file=sys.stderr)
         pixel = self.img_data[int(j) - 1][int(i) - 1]
-        return (1 / 255) * vec3.Vec3(*pixel)
+        return vec3.Vec3(*pixel)
 
 
 class Noise(Texture):

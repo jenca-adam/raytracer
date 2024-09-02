@@ -4,9 +4,10 @@ from .material import *
 from .texture import *
 from .randfloat import randfloat
 from .vec3 import Vec3
+from .bvh import BVH
 import random
 import sys
-
+import numpy as np
 
 def render_main():
     world = HittableList()
@@ -22,7 +23,7 @@ def render_main():
         vfov=20,
         lookfrom=Vec3(13, 2, 3),
         lookat=Vec3(0, 0.2, 0),
-        samples_per_pixel=20,
+        samples_per_pixel=5,
         image_width=800,
         defocus_angle=0,
         focus_dist=10,
@@ -40,8 +41,8 @@ def render_main():
             ),
         )
     )
-    for a in range(-11, 11):
-        for b in range(-11, 11):
+    for a in range(-5, 5):
+        for b in range(-5, 5):
             mat = random.random()
             center = Vec3(a + 0.9 * random.random(), 0.2, b + 0.9 * random.random())
             if (center - Vec3(4, 0.2, 0)).length > 0.9:
@@ -58,6 +59,7 @@ def render_main():
     world.add(Sphere(Vec3(0, 1, 0), 1.0, Dielectric(1.5)))
     world.add(Sphere(Vec3(-4, 1, 0), 1.0, Lambertian(Vec3(0.4, 0.2, 0.1))))
     world.add(Sphere(Vec3(4, 1, 0), 1.0, Metal(Vec3(0.7, 0.6, 0.5), 0.0)))
+    #world = BVH.from_hittable_list(world)
     cam.render(world)
 
 
@@ -217,6 +219,20 @@ def render_simple_light_2():
     cam.render(world)
 
 
+def render_textured_light():
+    world = HittableList()
+    world.add(Sphere(Vec3(0, 2, 0), 2, DiffuseLight(Image("wah-01.png"), 4)))
+    world.add(Sphere(Vec3(0, -1000, 0), 1000, Lambertian(Vec3(1, 1, 1))))
+    cam = Camera(
+        vfov=20,
+        samples_per_pixel=100,
+        image_width=400,
+        lookfrom=Vec3(26, 3, 6),
+        background=Vec3(0.00, 0.0, 0.0),
+    )
+    cam.render(world)
+
+
 def main():
     tp = sys.argv[-1]
     if tp == "main":
@@ -235,6 +251,8 @@ def main():
         render_simple_light()
     elif tp == "simple_light2":
         render_simple_light_2()
+    elif tp == "textured_light":
+        render_textured_light()
     else:
         raise ValueError("unknown:", tp)
 

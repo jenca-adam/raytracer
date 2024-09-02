@@ -1,7 +1,6 @@
 import tqdm
 import sys
 
-
 def export_image(image_data):
     w, h = len(image_data[0]), len(image_data)
     header = f"P6\n{w} {h}\n255\n".encode("ascii")
@@ -17,7 +16,7 @@ def write_header(w, h):
     sys.stdout.buffer.write(f"P6\n{w} {h}\n255\n".encode("ascii"))
 
 
-def write_color(r, g, b):
+def write_color(r,g,b):
     sys.stdout.buffer.write(bytes((r, g, b)))
 
 
