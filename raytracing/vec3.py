@@ -107,7 +107,8 @@ class Vec3:
 
     def item_mul(self, v):
         return Vec3(self.x * v.x, self.y * v.y, self.z * v.z)
-
+    def abs(self):
+        return Vec3(abs(self.x), abs(self.y), abs(self.z))
     @classmethod
     def refract(cls, uv, n, etai_over_etat):
         cos_theta = min(-uv.dot(n), 1)

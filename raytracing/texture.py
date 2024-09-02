@@ -1,6 +1,7 @@
 from PIL import Image as PILImage
 from numpy import float64, asarray
 import sys
+import math
 from . import vec3, interval, perlin
 
 
@@ -54,8 +55,19 @@ class Image(Texture):
 
 
 class Noise(Texture):
-    def __init__(self):
+    def __init__(self, scale=1, mode="normal", turb_depth = 7, albedo=vec3.Vec3(1,1,1)):
         self.noise = perlin.Perlin()
-
+        self.scale = scale
+        self.albedo = albedo
+        self.mode = mode
+        self.turb_depth = turb_depth
     def sample(self, u, v, p):
-        return vec3.Vec3(1, 1, 1) * self.noise.noise(p)
+        if self.mode=="normal":
+            text = 0.5 * (1+self.noise.noise(p*self.scale))
+        elif self.mode=="turb":
+            text = self.noise.turb(p*self.scale,self.turb_depth)
+        elif self.mode=="sine":
+            text = (1+math.sin(self.scale*p.z+10 *self.noise.turb(p, self.turb_depth)))
+        else:
+            text = 1
+        return self.albedo*text
